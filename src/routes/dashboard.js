@@ -128,7 +128,15 @@ router.post("/advance", async (req, res, next) => {
         args: [target.year, target.month],
       });
 
-      const activeRs = await tx.execute("SELECT id FROM patrons WHERE active = 1");
+      // Only patrons active as of this month — someone added later
+      // (active_since in the future relative to this month) doesn't get
+      // a ticket for months before they joined.
+      const activeRs = await tx.execute({
+        sql: `SELECT id FROM patrons
+              WHERE active = 1
+                AND (active_since_year * 12 + active_since_month) <= (? * 12 + ?)`,
+        args: [target.year, target.month],
+      });
       for (const p of activeRs.rows) {
         await tx.execute({
           sql: `INSERT INTO ticket_log (patron_id, year, month, delta, reason)

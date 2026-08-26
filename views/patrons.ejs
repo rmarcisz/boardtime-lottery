@@ -15,7 +15,7 @@
 
   <table class="tickets-table">
     <thead>
-      <tr><th>Patron</th><th>Kupony (łącznie)</th><th>Status</th><th></th></tr>
+      <tr><th>Patron</th><th>Kupony (łącznie)</th><th>Status</th><th>Aktywny od</th><th></th></tr>
     </thead>
     <tbody>
       <% patrons.forEach(function(p) { %>
@@ -23,6 +23,21 @@
           <td><%= p.name %></td>
           <td class="tickets-count"><%= p.tickets %></td>
           <td><%= p.active ? "aktywny" : "nieaktywny" %></td>
+          <td>
+            <form method="POST" action="/patrons/<%= p.id %>/active-since" class="active-since-form">
+              <select name="month">
+                <% monthNames.forEach(function(name, i) { %>
+                  <option value="<%= i + 1 %>" <%= (i + 1) === p.active_since_month ? "selected" : "" %>><%= name %></option>
+                <% }) %>
+              </select>
+              <select name="year">
+                <% yearOptions.forEach(function(y) { %>
+                  <option value="<%= y %>" <%= y === p.active_since_year ? "selected" : "" %>><%= y %></option>
+                <% }) %>
+              </select>
+              <button type="submit" class="link-btn">zmień</button>
+            </form>
+          </td>
           <td class="row-actions">
             <form method="POST" action="/patrons/<%= p.id %>/toggle" class="inline">
               <button type="submit" class="link-btn">
@@ -37,13 +52,15 @@
         </tr>
       <% }) %>
       <% if (!patrons.length) { %>
-        <tr><td colspan="4" class="muted">Brak patronów. Dodaj pierwszego powyżej.</td></tr>
+        <tr><td colspan="5" class="muted">Brak patronów. Dodaj pierwszego powyżej.</td></tr>
       <% } %>
     </tbody>
   </table>
 
   <p class="muted">
     Dezaktywowany patron przestaje dostawać comiesięczne kupony, ale zachowuje historię.
+    „Aktywny od” to pierwszy miesiąc, za który patron dostaje kupon — zmiana nie
+    cofa ani nie dodaje kuponów za już rozpoczęte miesiące, dotyczy tylko przyszłych.
     Usunięcie jest trwałe i kasuje całą jego historię.
   </p>
 

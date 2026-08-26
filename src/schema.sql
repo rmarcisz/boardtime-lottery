@@ -1,8 +1,14 @@
 -- Patrons of boardtimes.pl, entered manually by the site owner.
+-- active_since_year/month gates monthly grants (see /advance in
+-- dashboard.js): a patron only receives a ticket for months on or after
+-- this one, even while active = 1. Nullable so existing rows migrate
+-- cleanly — ensureSchema.js backfills them from created_at.
 CREATE TABLE IF NOT EXISTS patrons (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   active INTEGER NOT NULL DEFAULT 1,
+  active_since_year INTEGER,
+  active_since_month INTEGER CHECK (active_since_month IS NULL OR active_since_month BETWEEN 1 AND 12),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

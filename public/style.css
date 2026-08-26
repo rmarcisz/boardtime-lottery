@@ -196,12 +196,24 @@ button, .primary {
   font-size: 15px;
 }
 
-.start-month-form {
+.start-month-form,
+.active-since-form {
   display: flex;
   gap: 10px;
   align-items: center;
   margin-top: 16px;
   flex-wrap: wrap;
+}
+.active-since-form {
+  margin-top: 0;
+  gap: 6px;
+}
+.active-since-form select {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
 }
 .start-month-form select {
   padding: 10px 12px;
