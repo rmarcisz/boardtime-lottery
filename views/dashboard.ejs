@@ -5,13 +5,22 @@
   <div class="card">
     <h1>Zacznijmy!</h1>
     <p>
-      Nie rozpoczęto jeszcze żadnego miesiąca. Pierwszy miesiąc to
-      <strong><%= firstMonthLabel %></strong> — każdy aktywny patron dostanie
-      wtedy swój pierwszy kupon.
+      Nie rozpoczęto jeszcze żadnego miesiąca. Wybierz, od którego miesiąca
+      zacząć — każdy aktywny patron dostanie wtedy swój pierwszy kupon.
     </p>
     <p class="muted">Dodaj najpierw patronów w zakładce „Patroni”, jeśli jeszcze tego nie zrobiłeś.</p>
-    <form method="POST" action="/advance">
-      <button type="submit" class="primary">Rozpocznij <%= firstMonthLabel %></button>
+    <form method="POST" action="/advance" class="start-month-form">
+      <select name="month">
+        <% monthNames.forEach(function(name, i) { %>
+          <option value="<%= i + 1 %>" <%= (i + 1) === defaultMonth ? "selected" : "" %>><%= name %></option>
+        <% }) %>
+      </select>
+      <select name="year">
+        <% yearOptions.forEach(function(y) { %>
+          <option value="<%= y %>" <%= y === defaultYear ? "selected" : "" %>><%= y %></option>
+        <% }) %>
+      </select>
+      <button type="submit" class="primary">Rozpocznij</button>
     </form>
   </div>
 <% } else { %>

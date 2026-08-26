@@ -52,13 +52,16 @@ router.get("/", async (req, res, next) => {
     const latest = await getLatestMonth();
 
     if (!latest) {
-      // No month has ever been started — nothing to show yet.
+      // No month has ever been started — let the owner pick where the
+      // ledger begins (e.g. matching when the patron program actually
+      // started) instead of forcing today's calendar month.
+      const today = months.todayYearMonth();
       return res.render("dashboard", {
         started: false,
-        firstMonthLabel: months.label(
-          months.todayYearMonth().year,
-          months.todayYearMonth().month
-        ),
+        monthNames: months.POLISH_MONTHS,
+        defaultYear: today.year,
+        defaultMonth: today.month,
+        yearOptions: [today.year - 1, today.year, today.year + 1],
       });
     }
 
@@ -104,9 +107,21 @@ router.post("/advance", async (req, res, next) => {
       const latestRs = await tx.execute(
         "SELECT year, month FROM months ORDER BY year DESC, month DESC LIMIT 1"
       );
-      const target = latestRs.rows[0]
-        ? months.next(latestRs.rows[0])
-        : months.todayYearMonth();
+      let target;
+      if (latestRs.rows[0]) {
+        // Already started — always advance by exactly one month. Any
+        // year/month posted here (there shouldn't be any) is ignored, so
+        // the ledger can't be made to skip or jump around.
+        target = months.next(latestRs.rows[0]);
+      } else {
+        // First month ever — the owner picks where the ledger begins.
+        const chosenYear = parseInt(req.body.year, 10);
+        const chosenMonth = parseInt(req.body.month, 10);
+        target =
+          chosenYear && chosenMonth >= 1 && chosenMonth <= 12
+            ? { year: chosenYear, month: chosenMonth }
+            : months.todayYearMonth();
+      }
 
       await tx.execute({
         sql: "INSERT INTO months (year, month) VALUES (?, ?)",

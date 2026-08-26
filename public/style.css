@@ -94,6 +94,14 @@ h2 { font-size: 19px; }
   border-radius: 8px;
   font-size: 14px;
 }
+.notice {
+  background: #eaf5ec;
+  border: 1px solid #c3e2c8;
+  color: var(--win);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+}
 
 button, .primary {
   cursor: pointer;
@@ -186,4 +194,47 @@ button, .primary {
   border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 15px;
+}
+
+.start-month-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.start-month-form select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  background: #fff;
+}
+.start-month-form .primary { margin-top: 0; }
+
+.danger-zone {
+  border-color: var(--danger);
+  background: #fdf5f4;
+}
+.danger-zone h2 { color: var(--danger); margin-top: 0; }
+.danger-confirm-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.danger-confirm-row input {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  width: 160px;
+}
+.danger-btn {
+  background: var(--danger);
+  color: #fff;
+}
+.danger-btn:disabled {
+  background: #d9b9b6;
+  cursor: not-allowed;
 }

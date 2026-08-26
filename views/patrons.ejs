@@ -4,6 +4,9 @@
   <h1>Patroni</h1>
 
   <% if (error) { %><p class="error"><%= error.replace(/\+/g, " ") %></p><% } %>
+  <% if (typeof cleared !== "undefined" && cleared) { %>
+    <p class="notice">Baza danych została wyczyszczona.</p>
+  <% } %>
 
   <form method="POST" action="/patrons" class="add-patron-form">
     <input type="text" name="name" placeholder="Imię i nazwisko / nick" required autofocus>
@@ -43,5 +46,33 @@
     Dezaktywowany patron przestaje dostawać comiesięczne kupony, ale zachowuje historię.
     Usunięcie jest trwałe i kasuje całą jego historię.
   </p>
+
+  <div class="card danger-zone">
+    <h2>Strefa niebezpieczna</h2>
+    <p class="muted">
+      Usuwa <strong>wszystko</strong>: wszystkich patronów, całą historię kuponów
+      i wszystkie miesiące. Nie da się tego cofnąć.
+    </p>
+    <form method="POST" action="/admin/clear-database" id="clear-db-form"
+          onsubmit="return confirm('Na pewno wyczyścić całą bazę danych? Wszyscy patroni i cała historia kuponów zostaną usunięte bezpowrotnie.');">
+      <label for="clear-confirm" class="muted">
+        Wpisz <strong>WYCZYŚĆ</strong>, żeby odblokować przycisk:
+      </label>
+      <div class="danger-confirm-row">
+        <input type="text" id="clear-confirm" autocomplete="off" placeholder="WYCZYŚĆ">
+        <button type="submit" class="danger-btn" id="clear-db-btn" disabled>Wyczyść bazę danych</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    (function () {
+      var input = document.getElementById("clear-confirm");
+      var btn = document.getElementById("clear-db-btn");
+      input.addEventListener("input", function () {
+        btn.disabled = input.value.trim() !== "WYCZYŚĆ";
+      });
+    })();
+  </script>
 </main>
 <%- include("partials/foot") %>

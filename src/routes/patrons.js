@@ -15,7 +15,11 @@ router.get("/patrons", async (req, res, next) => {
        GROUP BY p.id
        ORDER BY p.active DESC, p.name ASC`
     );
-    res.render("patrons", { patrons: rows, error: req.query.error || null });
+    res.render("patrons", {
+      patrons: rows,
+      error: req.query.error || null,
+      cleared: req.query.cleared === "1",
+    });
   } catch (err) {
     next(err);
   }
@@ -56,6 +60,27 @@ router.post("/patrons/:id/delete", async (req, res, next) => {
       "write"
     );
     res.redirect("/patrons");
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/admin/clear-database", async (req, res, next) => {
+  try {
+    // Wipes everything — patrons, months, and the whole ticket ledger.
+    // Guarded client-side by a typed confirmation phrase; nothing here
+    // double-checks that server-side since this is a single-password
+    // internal tool, but the action itself is intentionally all-or-nothing
+    // (no soft-delete) so there's nothing to leave half-cleared.
+    await db.client.batch(
+      [
+        { sql: "DELETE FROM ticket_log", args: [] },
+        { sql: "DELETE FROM months", args: [] },
+        { sql: "DELETE FROM patrons", args: [] },
+      ],
+      "write"
+    );
+    res.redirect("/patrons?cleared=1");
   } catch (err) {
     next(err);
   }

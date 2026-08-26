@@ -24,4 +24,4 @@ function todayYearMonth() {
   return { year: now.getFullYear(), month: now.getMonth() + 1 };
 }
 
-module.exports = { label, key, next, prev, todayYearMonth };
+module.exports = { POLISH_MONTHS, label, key, next, prev, todayYearMonth };
