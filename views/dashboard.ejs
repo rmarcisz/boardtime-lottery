@@ -10,19 +10,16 @@
     </p>
     <p class="muted">Dodaj najpierw patronów w zakładce „Patroni”, jeśli jeszcze tego nie zrobiłeś.</p>
     <form method="POST" action="/advance" class="start-month-form">
-      <select name="month">
-        <% monthNames.forEach(function(name, i) { %>
-          <option value="<%= i + 1 %>" <%= (i + 1) === defaultMonth ? "selected" : "" %>><%= name %></option>
-        <% }) %>
-      </select>
-      <select name="year">
-        <% yearOptions.forEach(function(y) { %>
-          <option value="<%= y %>" <%= y === defaultYear ? "selected" : "" %>><%= y %></option>
-        <% }) %>
-      </select>
+      <div class="month-slider">
+        <input type="range" class="month-slider-input" name="month_index"
+               min="0" max="<%= monthOptions.length - 1 %>" value="<%= defaultIndex %>"
+               data-label="start-month-label">
+        <span class="slider-label" id="start-month-label"><%= monthOptions[defaultIndex].label %></span>
+      </div>
       <button type="submit" class="primary">Rozpocznij</button>
     </form>
   </div>
+  <%- include("partials/monthSliderScript", { monthOptions: monthOptions }) %>
 <% } else { %>
 
   <% if (error) { %><p class="error"><%= error.replace(/\+/g, " ") %></p><% } %>

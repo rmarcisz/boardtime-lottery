@@ -199,28 +199,35 @@ button, .primary {
 .start-month-form,
 .active-since-form {
   display: flex;
-  gap: 10px;
+  gap: 14px;
   align-items: center;
   margin-top: 16px;
   flex-wrap: wrap;
 }
 .active-since-form {
   margin-top: 0;
-  gap: 6px;
+  gap: 8px;
 }
-.active-since-form select {
-  padding: 6px 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+
+.month-slider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.month-slider-input {
+  width: 220px;
+  accent-color: var(--accent);
+}
+.active-since-form .month-slider-input { width: 140px; }
+.slider-label {
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 9em;
+}
+.active-since-form .slider-label {
   font-size: 13px;
-  background: #fff;
-}
-.start-month-form select {
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 15px;
-  background: #fff;
+  font-weight: 500;
+  min-width: 7em;
 }
 .start-month-form .primary { margin-top: 0; }
 

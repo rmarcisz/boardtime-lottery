@@ -25,16 +25,12 @@
           <td><%= p.active ? "aktywny" : "nieaktywny" %></td>
           <td>
             <form method="POST" action="/patrons/<%= p.id %>/active-since" class="active-since-form">
-              <select name="month">
-                <% monthNames.forEach(function(name, i) { %>
-                  <option value="<%= i + 1 %>" <%= (i + 1) === p.active_since_month ? "selected" : "" %>><%= name %></option>
-                <% }) %>
-              </select>
-              <select name="year">
-                <% yearOptions.forEach(function(y) { %>
-                  <option value="<%= y %>" <%= y === p.active_since_year ? "selected" : "" %>><%= y %></option>
-                <% }) %>
-              </select>
+              <div class="month-slider">
+                <input type="range" class="month-slider-input" name="month_index"
+                       min="0" max="<%= monthOptions.length - 1 %>" value="<%= p.active_since_index %>"
+                       data-label="active-since-label-<%= p.id %>">
+                <span class="slider-label" id="active-since-label-<%= p.id %>"><%= monthOptions[p.active_since_index].label %></span>
+              </div>
               <button type="submit" class="link-btn">zmień</button>
             </form>
           </td>
@@ -91,5 +87,6 @@
       });
     })();
   </script>
+  <%- include("partials/monthSliderScript", { monthOptions: monthOptions }) %>
 </main>
 <%- include("partials/foot") %>

@@ -55,13 +55,12 @@ router.get("/", async (req, res, next) => {
       // No month has ever been started — let the owner pick where the
       // ledger begins (e.g. matching when the patron program actually
       // started) instead of forcing today's calendar month.
+      const monthOptions = months.monthRange();
       const today = months.todayYearMonth();
       return res.render("dashboard", {
         started: false,
-        monthNames: months.POLISH_MONTHS,
-        defaultYear: today.year,
-        defaultMonth: today.month,
-        yearOptions: [today.year - 1, today.year, today.year + 1],
+        monthOptions,
+        defaultIndex: months.indexOfMonth(monthOptions, today.year, today.month),
       });
     }
 
@@ -114,13 +113,12 @@ router.post("/advance", async (req, res, next) => {
         // the ledger can't be made to skip or jump around.
         target = months.next(latestRs.rows[0]);
       } else {
-        // First month ever — the owner picks where the ledger begins.
-        const chosenYear = parseInt(req.body.year, 10);
-        const chosenMonth = parseInt(req.body.month, 10);
-        target =
-          chosenYear && chosenMonth >= 1 && chosenMonth <= 12
-            ? { year: chosenYear, month: chosenMonth }
-            : months.todayYearMonth();
+        // First month ever — the owner picks where the ledger begins, via
+        // the slider's index into the fixed month range (Styczeń 2026+).
+        const monthOptions = months.monthRange();
+        const idx = parseInt(req.body.month_index, 10);
+        const chosen = Number.isInteger(idx) ? monthOptions[idx] : null;
+        target = chosen ? { year: chosen.year, month: chosen.month } : months.todayYearMonth();
       }
 
       await tx.execute({

@@ -16,13 +16,16 @@ router.get("/patrons", async (req, res, next) => {
        GROUP BY p.id
        ORDER BY p.active DESC, p.name ASC`
     );
-    const today = months.todayYearMonth();
+    const monthOptions = months.monthRange();
+    const patrons = rows.map((p) => ({
+      ...p,
+      active_since_index: months.indexOfMonth(monthOptions, p.active_since_year, p.active_since_month),
+    }));
     res.render("patrons", {
-      patrons: rows,
+      patrons,
       error: req.query.error || null,
       cleared: req.query.cleared === "1",
-      monthNames: months.POLISH_MONTHS,
-      yearOptions: [today.year - 2, today.year - 1, today.year, today.year + 1, today.year + 2],
+      monthOptions,
     });
   } catch (err) {
     next(err);
@@ -53,14 +56,14 @@ router.post("/patrons", async (req, res, next) => {
 
 router.post("/patrons/:id/active-since", async (req, res, next) => {
   try {
-    const year = parseInt(req.body.year, 10);
-    const month = parseInt(req.body.month, 10);
-    if (!year || !month || month < 1 || month > 12) {
-      return res.redirect("/patrons?error=Nieprawidłowa+data");
-    }
+    const monthOptions = months.monthRange();
+    const idx = parseInt(req.body.month_index, 10);
+    const chosen = Number.isInteger(idx) ? monthOptions[idx] : null;
+    if (!chosen) return res.redirect("/patrons?error=Nieprawidłowa+data");
+
     await db.execute(
       "UPDATE patrons SET active_since_year = ?, active_since_month = ? WHERE id = ?",
-      [year, month, req.params.id]
+      [chosen.year, chosen.month, req.params.id]
     );
     res.redirect("/patrons");
   } catch (err) {

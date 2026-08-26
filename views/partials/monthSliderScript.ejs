@@ -1,0 +1,11 @@
+<script>
+  window.MONTH_LABELS = <%- JSON.stringify(monthOptions.map(function (m) { return m.label; })) %>;
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".month-slider-input").forEach(function (input) {
+      var labelEl = document.getElementById(input.dataset.label);
+      var update = function () { labelEl.textContent = window.MONTH_LABELS[input.value]; };
+      input.addEventListener("input", update);
+      update();
+    });
+  });
+</script>
