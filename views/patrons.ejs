@@ -1,0 +1,47 @@
+<%- include("partials/head", { title: "Patroni" }) %>
+<%- include("partials/nav") %>
+<main class="page">
+  <h1>Patroni</h1>
+
+  <% if (error) { %><p class="error"><%= error.replace(/\+/g, " ") %></p><% } %>
+
+  <form method="POST" action="/patrons" class="add-patron-form">
+    <input type="text" name="name" placeholder="Imię i nazwisko / nick" required autofocus>
+    <button type="submit" class="primary">Dodaj patrona</button>
+  </form>
+
+  <table class="tickets-table">
+    <thead>
+      <tr><th>Patron</th><th>Kupony (łącznie)</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      <% patrons.forEach(function(p) { %>
+        <tr class="<%= p.active ? '' : 'inactive' %>">
+          <td><%= p.name %></td>
+          <td class="tickets-count"><%= p.tickets %></td>
+          <td><%= p.active ? "aktywny" : "nieaktywny" %></td>
+          <td class="row-actions">
+            <form method="POST" action="/patrons/<%= p.id %>/toggle" class="inline">
+              <button type="submit" class="link-btn">
+                <%= p.active ? "dezaktywuj" : "aktywuj" %>
+              </button>
+            </form>
+            <form method="POST" action="/patrons/<%= p.id %>/delete" class="inline"
+                  onsubmit="return confirm('Usunąć <%= p.name.replace(/'/g, "\\'") %> na stałe? To usunie też całą jego historię kuponów.');">
+              <button type="submit" class="link-btn danger">usuń</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (!patrons.length) { %>
+        <tr><td colspan="4" class="muted">Brak patronów. Dodaj pierwszego powyżej.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <p class="muted">
+    Dezaktywowany patron przestaje dostawać comiesięczne kupony, ale zachowuje historię.
+    Usunięcie jest trwałe i kasuje całą jego historię.
+  </p>
+</main>
+<%- include("partials/foot") %>

@@ -1,0 +1,14 @@
+<%- include("partials/head", { title: "Logowanie" }) %>
+<main class="center-page">
+  <form method="POST" action="/login" class="card login-card">
+    <h1>🎟️ Loteria Boardtimes</h1>
+    <p class="muted">Panel do zarządzania kuponami patronów.</p>
+    <% if (error) { %>
+      <p class="error"><%= error %></p>
+    <% } %>
+    <label for="password">Hasło</label>
+    <input type="password" id="password" name="password" autofocus required>
+    <button type="submit" class="primary">Zaloguj</button>
+  </form>
+</main>
+<%- include("partials/foot") %>

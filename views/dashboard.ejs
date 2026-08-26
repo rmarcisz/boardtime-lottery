@@ -1,0 +1,86 @@
+<%- include("partials/head", { title: started ? label : "Zacznijmy" }) %>
+<%- include("partials/nav") %>
+<main class="page">
+<% if (!started) { %>
+  <div class="card">
+    <h1>Zacznijmy!</h1>
+    <p>
+      Nie rozpoczęto jeszcze żadnego miesiąca. Pierwszy miesiąc to
+      <strong><%= firstMonthLabel %></strong> — każdy aktywny patron dostanie
+      wtedy swój pierwszy kupon.
+    </p>
+    <p class="muted">Dodaj najpierw patronów w zakładce „Patroni”, jeśli jeszcze tego nie zrobiłeś.</p>
+    <form method="POST" action="/advance">
+      <button type="submit" class="primary">Rozpocznij <%= firstMonthLabel %></button>
+    </form>
+  </div>
+<% } else { %>
+
+  <% if (error) { %><p class="error"><%= error.replace(/\+/g, " ") %></p><% } %>
+
+  <div class="month-nav">
+    <% if (isEarliest) { %>
+      <span class="arrow disabled">← poprzedni</span>
+    <% } else { %>
+      <a class="arrow" href="/?y=<%= prevYM.year %>&m=<%= prevYM.month %>">← poprzedni</a>
+    <% } %>
+
+    <h1><%= label %> <% if (isCurrent) { %><span class="badge">bieżący</span><% } %></h1>
+
+    <% if (isCurrent) { %>
+      <form method="POST" action="/advance" class="inline"
+            onsubmit="return confirm('Rozpocząć nowy miesiąc? Każdy aktywny patron dostanie kolejny kupon.');">
+        <button type="submit" class="arrow-btn">następny miesiąc →</button>
+      </form>
+    <% } else { %>
+      <a class="arrow" href="/?y=<%= nextYM.year %>&m=<%= nextYM.month %>">następny →</a>
+    <% } %>
+  </div>
+
+  <table class="tickets-table">
+    <thead>
+      <tr><th>Patron</th><th>Kupony</th><th></th></tr>
+    </thead>
+    <tbody>
+      <% patrons.forEach(function(p) { %>
+        <tr class="<%= p.active ? '' : 'inactive' %>">
+          <td>
+            <%= p.name %>
+            <% if (!p.active) { %><span class="muted">(nieaktywny)</span><% } %>
+          </td>
+          <td class="tickets-count"><%= p.tickets %></td>
+          <td>
+            <% if (isCurrent && p.active && p.tickets > 0) { %>
+              <form method="POST" action="/declare-winner" class="inline"
+                    onsubmit="return confirm('Ogłosić <%= p.name.replace(/'/g, "\\'") %> zwycięzcą? Straci wszystkie <%= p.tickets %> kupony.');">
+                <input type="hidden" name="patron_id" value="<%= p.id %>">
+                <button type="submit" class="win-btn">wygrał 🏆</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (!patrons.length) { %>
+        <tr><td colspan="3" class="muted">Brak patronów. Dodaj kogoś w zakładce „Patroni”.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <p class="muted total-line">
+    Suma kuponów: <strong><%= patrons.reduce(function(s, p) { return s + p.tickets; }, 0) %></strong>
+  </p>
+
+  <% if (winners.length) { %>
+    <div class="card">
+      <h2>Zwycięzcy — <%= label %></h2>
+      <ul>
+        <% winners.forEach(function(w) { %>
+          <li><%= w.name %> — wygrał z <%= w.tickets_won %> kuponami</li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+
+<% } %>
+</main>
+<%- include("partials/foot") %>
