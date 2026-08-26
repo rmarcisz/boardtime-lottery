@@ -1,10 +1,10 @@
 const fs = require("fs");
 const path = require("path");
-const { pool } = require("../db");
+const { client } = require("../db");
 
 async function ensureSchema() {
   const sql = fs.readFileSync(path.join(__dirname, "..", "schema.sql"), "utf8");
-  await pool.query(sql);
+  await client.executeMultiple(sql);
 }
 
 module.exports = { ensureSchema };

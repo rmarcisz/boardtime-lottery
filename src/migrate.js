@@ -3,12 +3,12 @@
 // when you want to create the tables without starting the whole app.
 require("dotenv").config();
 const { ensureSchema } = require("./lib/ensureSchema");
-const { pool } = require("./db");
+const { client } = require("./db");
 
 ensureSchema()
   .then(() => {
     console.log("Schema is up to date.");
-    return pool.end();
+    client.close();
   })
   .catch((err) => {
     console.error("Migration failed:", err);

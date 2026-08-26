@@ -18,10 +18,15 @@ A tiny internal tool for running boardtimes.pl's monthly patron lottery.
 
 ## Local setup
 
-1. Install Postgres locally (or point `DATABASE_URL` at any Postgres instance).
+1. Create a database with the [Turso CLI](https://docs.turso.tech/cli/introduction):
+   ```
+   turso db create boardtimes-lottery
+   turso db show boardtimes-lottery --url
+   turso db tokens create boardtimes-lottery
+   ```
 2. `npm install`
-3. `cp .env.example .env` and fill in `DATABASE_URL`, `ADMIN_PASSWORD`,
-   `SESSION_SECRET`.
+3. `cp .env.example .env` and fill in `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`,
+   `ADMIN_PASSWORD`, `SESSION_SECRET`.
 4. `npm run dev` — the server creates its tables automatically on startup
    (safe to run repeatedly, nothing is dropped).
 5. Visit `http://localhost:3000`, log in with `ADMIN_PASSWORD`.
@@ -29,18 +34,17 @@ A tiny internal tool for running boardtimes.pl's monthly patron lottery.
 ## Deploying to Render
 
 This repo includes a `render.yaml` Blueprint — in the Render dashboard, use
-**New → Blueprint**, point it at this repo, and it will provision:
+**New → Blueprint**, point it at this repo, and it will provision a **Web
+Service** running the app. You'll be prompted for the secrets that aren't
+auto-generated: `ADMIN_PASSWORD`, `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`.
+`SESSION_SECRET` is generated for you.
 
-- a **Web Service** running this app
-- a **Postgres** database, wired up via `DATABASE_URL` automatically
+To add or change these later without redeploying from the Blueprint: Render
+dashboard → the service → **Environment** tab → **Add Environment Variable**.
+Saving triggers a redeploy automatically.
 
-You'll be prompted to set `ADMIN_PASSWORD` (the one secret not auto-generated).
-`SESSION_SECRET` is generated for you by Render.
-
-Render's free Postgres tier is time-limited (currently expires after 30 days
-and needs manual renewal, or upgrade to a paid instance) — check Render's
-current policy before relying on the free tier long-term, since this tool's
-whole point is holding onto data across many months.
+Turso's free tier (500 databases, generous row/storage limits) comfortably
+covers a dataset this small, with no expiry to worry about.
 
 ## Notes on the data model
 
@@ -49,6 +53,7 @@ one row in `ticket_log`. A patron's ticket count for any month is just the
 sum of their log rows up to that month, which is also how historical months
 are reconstructed when you browse backward.
 
-Deleting a patron deletes their history with them. If you just want them to
-stop receiving monthly tickets but keep their record, use **dezaktywuj**
-instead.
+Deleting a patron deletes their history with them (done explicitly in code,
+since Turso's per-request HTTP connections make relying on SQLite's
+`ON DELETE CASCADE` unreliable). If you just want them to stop receiving
+monthly tickets but keep their record, use **dezaktywuj** instead.

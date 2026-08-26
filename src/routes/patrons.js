@@ -7,9 +7,9 @@ router.use(requireAuth);
 
 router.get("/patrons", async (req, res, next) => {
   try {
-    const { rows } = await db.query(
+    const { rows } = await db.execute(
       `SELECT p.id, p.name, p.active,
-              COALESCE(SUM(tl.delta), 0)::int AS tickets
+              COALESCE(SUM(tl.delta), 0) AS tickets
        FROM patrons p
        LEFT JOIN ticket_log tl ON tl.patron_id = p.id
        GROUP BY p.id
@@ -25,7 +25,7 @@ router.post("/patrons", async (req, res, next) => {
   try {
     const name = (req.body.name || "").trim();
     if (!name) return res.redirect("/patrons?error=Podaj+imię+i+nazwisko");
-    await db.query("INSERT INTO patrons (name) VALUES ($1)", [name]);
+    await db.execute("INSERT INTO patrons (name) VALUES (?)", [name]);
     res.redirect("/patrons");
   } catch (err) {
     next(err);
@@ -34,8 +34,8 @@ router.post("/patrons", async (req, res, next) => {
 
 router.post("/patrons/:id/toggle", async (req, res, next) => {
   try {
-    await db.query(
-      "UPDATE patrons SET active = NOT active WHERE id = $1",
+    await db.execute(
+      "UPDATE patrons SET active = 1 - active WHERE id = ?",
       [req.params.id]
     );
     res.redirect("/patrons");
@@ -46,7 +46,15 @@ router.post("/patrons/:id/toggle", async (req, res, next) => {
 
 router.post("/patrons/:id/delete", async (req, res, next) => {
   try {
-    await db.query("DELETE FROM patrons WHERE id = $1", [req.params.id]);
+    // No reliable ON DELETE CASCADE across Turso's per-request connections —
+    // delete the patron's ticket history explicitly, in the same batch.
+    await db.client.batch(
+      [
+        { sql: "DELETE FROM ticket_log WHERE patron_id = ?", args: [req.params.id] },
+        { sql: "DELETE FROM patrons WHERE id = ?", args: [req.params.id] },
+      ],
+      "write"
+    );
     res.redirect("/patrons");
   } catch (err) {
     next(err);
